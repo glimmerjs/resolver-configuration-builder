@@ -56,7 +56,7 @@ ResolverConfigurationBuilder.prototype.build = function() {
     fs.mkdirSync(destPath);
   }
 
-  let contents = "export default {" + JSON.stringify(resolverConfiguration) + "};" + '\n';
+  let contents = "export default " + JSON.stringify(resolverConfiguration) + ";" + '\n';
 
   fs.writeFileSync(path.join(this.outputPath, 'config', 'resolver-configuration.js'), contents, { encoding: 'utf8' });
 };
