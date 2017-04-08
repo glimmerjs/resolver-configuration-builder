@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const co = require('co');
 const assert = require('assert');
+const walkSync = require('walk-sync');
 
 const BroccoliTestHelper = require('broccoli-test-helper');
 const buildOutput = BroccoliTestHelper.buildOutput;
@@ -18,6 +19,10 @@ describe('resolver-configuration-builder', function() {
 
     let configPath = path.join(__dirname, 'fixtures', 'config', 'environment.json');
     configContents = fs.readFileSync(configPath, { encoding: 'utf8' });
+
+    input.write({
+      'environment.json': configContents
+    })
   }));
 
   afterEach(function() {
@@ -25,9 +30,6 @@ describe('resolver-configuration-builder', function() {
   })
 
   it('can read a config file and log results (if requested)', co.wrap(function* () {
-    input.write({
-      'environment.json': configContents
-    })
     let options = { configPath: 'environment.json', logResult: true };
 
     let configBuilder = new ResolverConfigurationBuilder(input.path(), options);
@@ -93,6 +95,7 @@ describe('resolver-configuration-builder', function() {
       logResult: true
     };
 
+    input.write({}); // clear input tree
     let configBuilder = new ResolverConfigurationBuilder(input.path(), options);
 
     yield buildOutput(configBuilder);
@@ -124,5 +127,30 @@ describe('resolver-configuration-builder', function() {
         }
       }
     );
+  }));
+
+  it('emits a .d.ts file', co.wrap(function* () {
+    let options = { configPath: 'environment.json' };
+
+    let configBuilder = new ResolverConfigurationBuilder(input.path(), options);
+
+    let output = yield buildOutput(configBuilder);
+
+    assert.ok(output.read().config['resolver-configuration.d.ts'], '*.d.ts was present');
+  }));
+
+  it('emits files in correct locations', co.wrap(function* () {
+    let options = { configPath: 'environment.json' };
+
+    let configBuilder = new ResolverConfigurationBuilder(input.path(), options);
+
+    let output = yield buildOutput(configBuilder);
+
+    let entries = walkSync(output.path(), { directories: false });
+
+    assert.deepEqual(entries, [
+      'config/resolver-configuration.d.ts',
+      'config/resolver-configuration.js'
+    ]);
   }));
 });
