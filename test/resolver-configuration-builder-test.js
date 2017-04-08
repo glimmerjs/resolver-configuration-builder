@@ -13,7 +13,7 @@ describe('resolver-configuration-builder', function() {
     let configBuilder = new ResolverConfigurationBuilder(config, options);
 
     return build(configBuilder)
-      .then(result => {
+      .then(() => {
         assert.deepEqual(
           configBuilder.result,
           {
@@ -45,8 +45,8 @@ describe('resolver-configuration-builder', function() {
   });
 
   it('can use config options if no config file exists', function() {
-    let src = path.join(process.cwd(), 'test', 'fixtures', 'src');
     let config = path.join(process.cwd(), 'test', 'fixtures', 'config');
+
     let options = {
       defaultModulePrefix: 'my-app',
       defaultModuleConfiguration: {
@@ -79,7 +79,7 @@ describe('resolver-configuration-builder', function() {
     let configBuilder = new ResolverConfigurationBuilder(config, options);
 
     return build(configBuilder)
-      .then(result => {
+      .then(() => {
         assert.deepEqual(
           configBuilder.result,
           {

@@ -3,7 +3,6 @@
 const Plugin = require('broccoli-plugin');
 const fs = require('fs');
 const path = require('path');
-const walkSync = require('walk-sync');
 
 function ResolverConfigurationBuilder(config, options) {
   options = options || {};
