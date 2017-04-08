@@ -3,6 +3,11 @@
 const Plugin = require('broccoli-plugin');
 const fs = require('fs');
 const path = require('path');
+const INTERFACE = `
+import { ResolverConfiguration } from '@glimmer/resolver';
+declare let config: ResolverConfiguration;
+export default config;
+`;
 
 class ResolverConfigurationBuilder extends Plugin {
   constructor(config, options) {
@@ -55,6 +60,7 @@ class ResolverConfigurationBuilder extends Plugin {
     let contents = "export default " + JSON.stringify(resolverConfiguration) + ";" + '\n';
 
     fs.writeFileSync(path.join(this.outputPath, 'config', 'resolver-configuration.js'), contents, { encoding: 'utf8' });
+    fs.writeFileSync(path.join(this.outputPath, 'config', 'resolver-configuration.d.ts'), INTERFACE, { encoding: 'utf8' });
   }
 }
 
