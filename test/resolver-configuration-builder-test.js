@@ -1,19 +1,38 @@
 'use strict';
 
 const ResolverConfigurationBuilder = require('..');
-const { build } = require('broccoli-fixture');
+const fs = require('fs');
 const path = require('path');
 const co = require('co');
 const assert = require('assert');
 
+const BroccoliTestHelper = require('broccoli-test-helper');
+const buildOutput = BroccoliTestHelper.buildOutput;
+const createTempDir = BroccoliTestHelper.createTempDir;
+
 describe('resolver-configuration-builder', function() {
+  let input, configContents;
+
+  beforeEach(co.wrap(function* () {
+    input = yield createTempDir();
+
+    let configPath = path.join(__dirname, 'fixtures', 'config', 'environment.json');
+    configContents = fs.readFileSync(configPath, { encoding: 'utf8' });
+  }));
+
+  afterEach(function() {
+    return input.dispose();
+  })
+
   it('can read a config file and log results (if requested)', co.wrap(function* () {
-    let config = path.join(process.cwd(), 'test', 'fixtures', 'config');
+    input.write({
+      'environment.json': configContents
+    })
     let options = { configPath: 'environment.json', logResult: true };
 
-    let configBuilder = new ResolverConfigurationBuilder(config, options);
+    let configBuilder = new ResolverConfigurationBuilder(input.path(), options);
 
-    yield build(configBuilder);
+    yield buildOutput(configBuilder);
 
     assert.deepEqual(
       configBuilder.result,
@@ -45,8 +64,6 @@ describe('resolver-configuration-builder', function() {
   }));
 
   it('can use config options if no config file exists', co.wrap(function* () {
-    let config = path.join(process.cwd(), 'test', 'fixtures', 'config');
-
     let options = {
       defaultModulePrefix: 'my-app',
       defaultModuleConfiguration: {
@@ -76,9 +93,9 @@ describe('resolver-configuration-builder', function() {
       logResult: true
     };
 
-    let configBuilder = new ResolverConfigurationBuilder(config, options);
+    let configBuilder = new ResolverConfigurationBuilder(input.path(), options);
 
-    yield build(configBuilder);
+    yield buildOutput(configBuilder);
 
     assert.deepEqual(
       configBuilder.result,
